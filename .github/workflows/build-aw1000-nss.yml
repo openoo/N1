@@ -8,8 +8,8 @@ permissions:
     actions: write
 
 env:
-    REPO_URL: https://github.com/AgustinLorenzo/openwrt.git
-    REPO_BRANCH: main_nss
+    REPO_URL: https://github.com/qosmio/openwrt-ipq.git
+    REPO_BRANCH: 24.10-nss
     CONFIG_FILE: AW1000-NSS/.config
     DIY_SH: AW1000-NSS/diy.sh
     FILES: AW1000-NSS/files
@@ -91,6 +91,7 @@ jobs:
             - name: 🔄 更新 feeds
               working-directory: ./openwrt
               run: |
+                  echo 'src-git nss_packages https://github.com/qosmio/nss-packages.git;NSS-12.5-K6.x-wwan' >> feeds.conf.default
                   ./scripts/feeds update -a
 
             - name: ⚙️ 加载自定义配置
