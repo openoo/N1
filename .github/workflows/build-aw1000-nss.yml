@@ -91,7 +91,7 @@ jobs:
             - name: 🔄 更新 feeds
               working-directory: ./openwrt
               run: |
-                  echo 'src-git nss_packages https://github.com/qosmio/nss-packages.git;NSS-12.5-K6.x-wwan' >> feeds.conf.default
+                  sed -i 's|\(src-git nss_packages https://github.com/qosmio/nss-packages.git\);.*|\1;NSS-12.5-K6.x-wwan|' feeds.conf.default
                   ./scripts/feeds update -a
 
             - name: ⚙️ 加载自定义配置
