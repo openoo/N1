@@ -86,5 +86,3 @@ zip
 zlib1g-dev
 zstd
 time
-sed
-perl
