@@ -1,10 +1,6 @@
 #!/bin/bash
-# 使用新版 Go 工具链，减少 PassWall 和现代插件编译失败概率。
-rm -rf feeds/packages/lang/golang
-git clone --depth=1 --branch=26.x https://github.com/sbwml/packages_lang_golang feeds/packages/lang/golang
-
 # 清除 feeds 中自带的 Argon，避免和 jerrykuku 的 master 版本冲突。
-rm -rf feeds/luci/themes/luci-theme-argon feeds/luci/applications/luci-app-argon-config
+rm -rf package/feeds/luci/luci-theme-argon package/feeds/luci/luci-app-argon-config
 git clone --depth=1 --branch=master https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 git clone --depth=1 --branch=master https://github.com/jerrykuku/luci-app-argon-config package/luci-app-argon-config
 
@@ -27,14 +23,6 @@ git clone --depth=1 https://github.com/derisamedia/luci-app-arwi-dashboard packa
 git clone --depth=1 https://github.com/sbwml/luci-app-ramfree.git package/custom-feeds/luci-app-ramfree
 git clone --depth=1 https://github.com/4IceG/luci-app-modemdata package/custom-feeds/luci-app-modemdata
 git clone --depth=1 https://github.com/destan19/OpenAppFilter package/custom-feeds/OpenAppFilter
-
-# 使用 OpenWrt 标准 sms-tool 包，但跟进 obsy/sms_tool 的最新源码。
-sms_tool_makefile="feeds/packages/utils/sms-tool/Makefile"
-if [ -f "$sms_tool_makefile" ]; then
-  sed -i 's/^PKG_SOURCE_DATE:=.*/PKG_SOURCE_DATE:=2026-05-16/' "$sms_tool_makefile"
-  sed -i 's/^PKG_SOURCE_VERSION:=.*/PKG_SOURCE_VERSION:=94899dc987d3a63bd04f8b8e25f6296381d76790/' "$sms_tool_makefile"
-  sed -i 's/^PKG_MIRROR_HASH:=.*/PKG_MIRROR_HASH:=skip/' "$sms_tool_makefile"
-fi
 
 # 默认后台地址
 sed -i 's/192.168.1.1/192.168.123.1/g' package/base-files/files/bin/config_generate
