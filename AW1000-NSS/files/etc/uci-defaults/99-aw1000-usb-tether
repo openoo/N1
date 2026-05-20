@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # 保留仓库现有 USB 共享网络习惯：usb0 自动作为 WAN 上游。
-uci -q set network.lan.ipaddr='10.10.10.1'
+uci -q set network.lan.ipaddr='192.168.123.1'
 uci -q set network.lan.netmask='255.255.255.0'
 
 if ! uci -q get network.usbv4 >/dev/null; then

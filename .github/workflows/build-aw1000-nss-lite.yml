@@ -11,7 +11,7 @@ env:
     REPO_URL: https://github.com/qosmio/openwrt-ipq.git
     REPO_BRANCH: 24.10-nss
     NSS_PACKAGES_BRANCH: NSS-12.5-K6.x-wwan
-    CONFIG_FILE: AW1000-NSS/config-lite.seed
+    CONFIG_FILE: AW1000-NSS/.config
     DIY_SH: AW1000-NSS/diy.sh
     FILES: AW1000-NSS/files
     TZ: Asia/Shanghai
@@ -78,7 +78,7 @@ jobs:
                       /workdir/openwrt/build_dir/toolchain-*
                       /workdir/openwrt/staging_dir/host
                       /workdir/openwrt/staging_dir/toolchain-*
-                  key: ${{ runner.os }}-openwrt-AW1000-NSS-Lite-${{ env.REPO_BRANCH }}-${{ env.NSS_PACKAGES_BRANCH }}-${{ hashFiles('AW1000-NSS/config-lite.seed', 'AW1000-NSS/diy.sh', 'AW1000-NSS/files/**') }}
+                  key: ${{ runner.os }}-openwrt-AW1000-NSS-Lite-${{ env.REPO_BRANCH }}-${{ env.NSS_PACKAGES_BRANCH }}-${{ hashFiles('AW1000-NSS/.config', 'AW1000-NSS/diy.sh', 'AW1000-NSS/files/**') }}
                   restore-keys: |
                       ${{ runner.os }}-openwrt-AW1000-NSS-Lite-${{ env.REPO_BRANCH }}-${{ env.NSS_PACKAGES_BRANCH }}-
                       ${{ runner.os }}-openwrt-AW1000-NSS-Lite-${{ env.REPO_BRANCH }}-
@@ -93,7 +93,10 @@ jobs:
             - name: 🔄 更新 feeds
               working-directory: ./openwrt
               run: |
+                  sed -i '1isrc-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main' feeds.conf.default
+                  sed -i '1isrc-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main' feeds.conf.default
                   sed -i -E "s|(src-git nss_packages https://github.com/qosmio/nss-packages.git)(;[^[:space:]]+)?|\\1;${NSS_PACKAGES_BRANCH}|" feeds.conf.default
+                  grep -n "passwall_.*Openwrt-Passwall" feeds.conf.default
                   grep -n "nss_packages.*${NSS_PACKAGES_BRANCH}" feeds.conf.default
                   ./scripts/feeds update -a
 
@@ -140,24 +143,6 @@ jobs:
                   echo "compile_status=success" >> $GITHUB_ENV
                   echo "status=success" >> $GITHUB_OUTPUT
 
-            - name: 🧾 输出失败日志
-              if: ${{ failure() }}
-              run: |
-                  if [ -d openwrt/logs ]; then
-                    find openwrt/logs -type f | sort
-                    find openwrt/logs -type f \( -path '*qca-nss-ecm*' -o -path '*qca-nss-drv*' -o -path '*OpenAppFilter*' -o -path '*oaf*' -o -path '*passwall*' \) -print -exec sh -c 'echo "===== $1 ====="; tail -n 240 "$1"' sh {} \;
-                  else
-                    echo "No openwrt/logs directory found"
-                  fi
-
-            - name: 📤 上传失败日志
-              if: ${{ failure() }}
-              uses: actions/upload-artifact@v4
-              with:
-                  name: aw1000-nss-lite-build-logs
-                  path: openwrt/logs/**
-                  if-no-files-found: ignore
-
             - name: 🗂️ 整理发布产物
               if: ${{ steps.compile.outputs.status == 'success' && !cancelled() }}
               run: |
@@ -201,9 +186,9 @@ jobs:
                   body: |
                       基于 qosmio/openwrt-ipq 的 24.10-nss 分支构建
                       NSS 包分支: NSS-12.5-K6.x-wwan
-                      配置: AW1000-NSS/config-lite.seed
+                      配置: AW1000-NSS/.config
                       设备: Arcadyan AW1000
-                      默认管理地址: 10.10.10.1
+                      默认管理地址: 192.168.123.1
                       默认账户: root
                       默认密码: password
                       说明: 基于 nss-setup/config-nss.seed 的 Lite 配置；保留 PassWall、diy.sh 自定义功能、QModem/WWAN、USB 共享网络和中文 LuCI，不内置 USB 存储/Samba 文件共享。
